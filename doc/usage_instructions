@@ -1,0 +1,153 @@
+## Command line options
+
+PyKeylogger accepts a few commandline options to customize its behavior:
+
+```
+usage: keylogger.pyw [options]
+
+options:
+ --version             show program's version number and exit
+ -h, --help            show this help message and exit
+ -d, --debug           debug mode (print output to console instead of the log
+                       file) [default: False]
+ -c CONFIGFILE, --configfile=CONFIGFILE
+                       filename of the configuration ini file. [default:
+                       pykeylogger.ini]
+ -v CONFIGVAL, --configval=CONFIGVAL
+                       filename of the configuration validation file.
+                       [default: pykeylogger.val]
+```
+
+Whenever you need to see some console output (which you do when running in debug mode with "-d", or to get the above help message with "-h"), make sure you run
+
+keylogger_debug.exe -d
+
+```(or -h), if you are running binary, and```
+
+python keylogger.pyw -d
+
+```(or -h)``` when running from source. Just ```keylogger.exe -d``` or ```keylogger.pyw -d``` will not bring up a console window, and you will not see anything.
+
+## Control Panel Settings
+
+The rest of the options are passed to PyKeylogger through the .ini file, which you can edit using the control panel (avoid editing the .ini manually, as that bypasses all the input error checking done by the GUI).
+
+* The default key to bring up the control panel is "Lcontrol-Rcontrol-F12" (Just "F12" in versions before 0.9.0).
+* The default master password is blank (just hit enter in the password box).
+* The rest of the options are amply explained through tooltips in the settings panels. Just rest your mouse on any input box to see help for that item. Screenshot to the right will give you an idea of how the control panel looks.
+
+## Setting up Log Emailing
+
+PyKeylogger now supports TLS SMTP encryption, and thus can work with Gmail, Yahoo, and other providers that let you use secure SMTP. Instructions for some of the specific providers follow.
+
+### Gmail Setup
+
+Here are the instructions to set up PyKeylogger to use your Gmail account:
+
+* Set SMTP Send Email to True
+* Set SMTP Needs Login to True
+* Set SMTP Username to your gmail username, including the "@gmail.com" suffix. So, for example, you would put in "myusername@gmail.com"
+* Set SMTP Password to your password
+* Set SMTP Server to "smtp.gmail.com"
+* Set SMTP Port to 587 (alternatively, try 25)
+* Set SMTP Use TLS to True
+* Set SMTP From to your gmail address (same as your SMTP Username above)
+* Set SMTP To to the address you want the emails sent to (you can use the same address as above, if you want to)
+* Set SMTP Subject to whatever you want
+* Set SMTP Message Body to whatever you want
+* Set Email Interval to something reasonable (default is 4.0 hours)
+
+### Yahoo Mail Setup
+
+Here are the instructions to set up PyKeylogger to use your Yahoo mail account:
+
+* Set SMTP Send Email to True
+* Set SMTP Needs Login to True
+* Set SMTP Username to your Yahoo mail username, excluding the "@yahoo.com" suffix. So, for example, if your email address is "myusername@yahoo.com", you would put in "myusername"
+* Set SMTP Password to your password
+* Set SMTP Server to "smtp.mail.yahoo.com"
+* Set SMTP Port to 465 (alternatively, try 587)
+* Set SMTP Use TLS to True
+* Set SMTP From to your Yahoo email address
+* Set SMTP To to the address you want the emails sent to (you can use the same address as above, if you want to)
+* Set SMTP Subject to whatever you want
+* Set SMTP Message Body to whatever you want
+* Set Email Interval to something reasonable (default is 4.0 hours)
+
+Now, go ahead, give it a test run - In the Actions menu select Send logs by email and watch your target email account for those logs!
+
+If you don't get the email within 5-10 minutes, something is wrong with your setup. Check the spelling of your password, username, and the rest of the configuration items. If that fails, try running pykeylogger in debug mode (see instructions above), and run the Send logs by email action - watch the debug output scroll by, and see if it gives you any clues. If you can't figure it out, feel free to post it in the forums and someone will help. :)
+
+## Starting on system boot
+### Registry method (Windows)
+
+Use the registry editor (regedit) and navigate to the following key:
+
+```HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run```
+
+Once there, create a new string value (name it anything you like, e.g. "keylogger" or "innocentprogram").
+
+For the content of this new string value, enter the following:
+
+`C:\Path\pykeylogger.exe`
+
+If you have placed the .ini and .val files in a directory different from where you have placed the executable, then enter the following (including the quotes and everything):
+
+`"C:\Path\pykeylogger.exe" -c "C:\Path\pykeylogger.ini" -v" "C:\Path\pykeylogger.val"`
+
+where you of course replace "C:\Path\" with the actual full paths to the pykeylogger binary, and your .ini and .val files.
+
+### Task scheduler method (Windows)
+
+As per user suggestion, you can also schedule the keylogger to start using the Windows task scheduler. Just open up the task scheduler, and add a task to start PyKeylogger on startup with administrator privileges.
+
+### Linux
+
+Probably the easiest way to start on "startup" would be to add a task to your user session's startup programs list, in your desktop environment.
+
+If you know what you're doing, you could also stick a startup script into /etc/init.d (make sure that it starts after X), or create a .desktop file in /etc/xdg/autostart.
+
+## Stealth Tips
+
+There are situations when you may want PyKeylogger to be stealthy. Here are some tips on how to increase stealth.
+
+* When running the binary, and you don't want "keylogger.exe" to show up in the task list, just rename the executable to anything you like (e.g. monitor.exe)
+* You could run from source, in which case the process will show up as "pythonw.exe" in the task list, which is rather innocuous-looking.
+* As reported in this forum thread, when running the default binary, process description in the task manager shows up as "Simple Python Keylogger". To change that, get the source, edit the description field in file version.py to say whatever you want, and recompile the binary (or just run from source and forget about the binary).
+* As of version 1.0.3, you can change the "name" field in version.py, which will do the following:
+* * when compiling with py2exe, will create the binaries with that name
+* * pykeylogger will look for .ini, .val, and icon files with that name (so don't forget to rename those as well!)
+* * change PYKEYLOGGER_EXENAME in the .nsi file to the same name you set in version.py, if you want to create an NSIS installer.
+
+## Reading the log files
+
+As of version 0.9.0, PyKeylogger logs to one delimited file (with default delimiter being pipe '|'). This facilitates the process of importing the data into a spreadsheet or database for easy filtering and manipulation. This is much simpler and more robust than the log file formats for versions prior to 0.9.0. You can also of course open the file in any text editor of your choice (see "prior to 0.9.0" section for some tips regarding this).
+
+The data fields are the following (in order):
+
+* Date (4-digit Year, Month, Date: YYYYMMDD)
+* Time, 24 hour format, 1 minute resolution (Hours, Minutes: HHMM)
+* Full Application Path
+* Window Handle (a unique number identifying the window)
+* Username
+* Window title
+* Keystrokes logged
+* Keystroke count for this row (optional, if enabled in control panel)
+
+To keep the file consistent, when a user types the actual separator key (e.g. the pipe, '|', if you kept the default), the keystrokes logged will actually show the string "[sep_key]". So, after you import the data, you may wish to replace all occurrences of "[sep_key]" with the actual delimiting character.
+
+Before checking your log file, open the PyKeylogger control panel, and choose Actions > Flush Write Buffers from the menu, if you want to look at the most recent input.
+
+One user suggests that opening the logfile as an RTF in OpenOffice works well, too.
+
+## The following applies to PyKeylogger prior to 0.9.0 (0.8.2 and earlier)
+
+The log files are organized in directories, where each directory is named after the application name whose window you were typing into. Inside those directories, there are multiple text files, each file named by date, unique window handle, and window title. Thus, if you want to find what you typed in notepad, first go to the notepad directory, then find the log file by date and window title. If you are running with the --onefile option, however, everything just goes into one file.
+
+The log file has two non-printable characters in it: backspace, and escape. Thus, opening the file with Notepad or Wordpad, you will see a lot of "junk" characters, if you press a lot of backspace (which I do). To read the file properly (where backspace and escape are marked as such), use the excellent editor called SciTE.
+
+If you want to use windows notepad or wordpad, you may want to clean up the log file, by modifying the filter in PyKeylogger to substitute a string for those characters, as well as putting in \n\r instead of just \n in order to get the linebreaks in notepad to show up. This can be accomplished by setting these options in the PyKeylogger control panel.
+
+Before checking your log file, open the PyKeylogger control panel, and choose Actions > Flush Write Buffers from the menu, if you want to look at the most recent input. If you use Wordpad, you will notice that Wordpad refuses to open a file that is being used, so you will have to make a copy of the logfile and open the copy with Wordpad, rather than open the logfile directly.
+
+As of version 0.6.6, PyKeylogger automatically flushes the file write buffer periodically, so that even in the event of a system crash, you are less likely to lose the recent input. [Thanks to anonymous forum poster for this suggestion.]
